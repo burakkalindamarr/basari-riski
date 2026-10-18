@@ -17,6 +17,9 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from backend.explanations import explain_rows
+from backend.schema import build_schema
+
 ROOT = Path(__file__).resolve().parents[1]
 MODEL_PATH = ROOT / "model.joblib"
 DEMO_PATH = ROOT / "ornek_ogrenciler.csv"
@@ -37,12 +40,27 @@ COURSES = {
     9991: "İşletme (Akşam)",
 }
 
+class Contribution(BaseModel):
+    feature: str
+    label: str
+    contribution: float
+
+
+class Explanation(BaseModel):
+    unit: str
+    base_value: float
+    predicted_log_odds: float
+    increases: list[Contribution]
+    decreases: list[Contribution]
+
+
 class Student(BaseModel):
     id: str
     course: str
     risk: float
     level: str
     rank: int
+    explanation: Explanation
 
 
 class CourseStats(BaseModel):
@@ -67,6 +85,11 @@ class PredictionResult(BaseModel):
     algorithm: str
     features: int
     disclaimer: str
+
+
+class ManualStudent(BaseModel):
+    student: dict[str, float]
+    id: str = "MANUEL-001"
 
 
 app = FastAPI(
@@ -159,7 +182,9 @@ def analyze(data: pd.DataFrame, source: str) -> PredictionResult:
     X = checked_features(data, columns)
     ids = ids_from(data)
 
-    p = model.predict_proba(X)[:, 1] * 100
+    probabilities = model.predict_proba(X)[:, 1]
+    explanations = explain_rows(model, X, probabilities)
+    p = probabilities * 100
     if not np.isfinite(p).all():
         raise HTTPException(status_code=500, detail="Model geçerli olasılık üretmedi.")
 
@@ -173,7 +198,7 @@ def analyze(data: pd.DataFrame, source: str) -> PredictionResult:
             key = -1
         rows.append({
             "id": ids[i], "course": COURSES.get(key, f"Bölüm {key}"),
-            "risk": risk, "level": level,
+            "risk": risk, "level": level, "explanation": explanations[i],
         })
     rows.sort(key=lambda r: -r["risk"])
     students = [Student(**r, rank=i + 1) for i, r in enumerate(rows)]
@@ -210,6 +235,38 @@ def analyze(data: pd.DataFrame, source: str) -> PredictionResult:
 def health():
     load_model()
     return {"status": "ok", "model": "loaded"}
+
+
+@app.get("/api/schema")
+def form_schema():
+    return build_schema(COURSES)
+
+
+@app.post("/api/predict", response_model=PredictionResult)
+def predict_one(payload: ManualStudent):
+    if set(payload.student) != set(load_model()[1]):
+        missing = sorted(set(load_model()[1]) - set(payload.student))
+        unexpected = sorted(set(payload.student) - set(load_model()[1]))
+        raise HTTPException(
+            status_code=422,
+            detail=f"Özellik alanları eşleşmiyor. Eksik: {missing}; beklenmeyen: {unexpected}",
+        )
+    frame = pd.DataFrame([{"ogrenci_no": payload.id, **payload.student}])
+    # Strict category constraints prevent silently ignoring unknown input codes.
+    schema = build_schema(COURSES)
+    for field in schema["fields"]:
+        if field["kind"] == "select":
+            allowed = {option["value"] for option in field["options"]}
+            if payload.student[field["name"]] not in allowed:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Geçersiz kategori kodu: {field['label']}",
+                )
+        else:
+            value = payload.student[field["name"]]
+            if not field["min"] <= value <= field["max"]:
+                raise HTTPException(status_code=422, detail=f"Değer aralık dışında: {field['label']}")
+    return analyze(frame, "manual")
 
 
 @app.get("/api/demo", response_model=PredictionResult)
