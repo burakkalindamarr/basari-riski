@@ -13,7 +13,8 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile, Request
+from starlette.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -108,6 +109,16 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
+
+
+@app.middleware("http")
+async def privacy_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["X-Frame-Options"] = "DENY"
+    return response
 
 
 @lru_cache(maxsize=1)
@@ -295,4 +306,5 @@ async def analyze_csv(file: UploadFile = File(...)):
             status_code=422,
             detail="CSV okunamadı. UTF-8 ve virgülle ayrılmış şablon kullanın.",
         ) from None
-    return analyze(df, "upload")
+    # Run CPU-bound ML/SHAP work in the worker pool, not the event loop.
+    return await run_in_threadpool(analyze, df, "upload")
