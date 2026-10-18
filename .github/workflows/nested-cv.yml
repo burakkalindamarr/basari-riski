@@ -1,0 +1,36 @@
+name: Nested CV validation
+
+on:
+  push:
+    branches:
+      - improvement/01-model-validation
+    paths:
+      - experiments/run_nested_cv.py
+      - .github/workflows/nested-cv.yml
+      - data_3.csv
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install evaluation dependencies
+        run: python -m pip install --disable-pip-version-check numpy==2.2.6 pandas==2.3.3 scikit-learn==1.7.2
+      - name: Run nested validation
+        run: python -u experiments/run_nested_cv.py
+      - name: Store results
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nested-cv-results
+          path: nested_cv_results.json
