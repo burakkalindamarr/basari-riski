@@ -10,7 +10,9 @@ Mevcut Streamlit dağıtımı korunur. Bu klasörlerdeki kodlar onun yerine geç
 - **React + TypeScript:** Kurumsal panel, risk dağılımı/bölüm grafikleri, risk sıralaması, filtreleme, öğrenci detayı, CSV çıktı ve açık/koyu tema.
 - **Kaynak açıklığı:** %50 ve %75 kategorileri örnek eşikler olarak açıkça belirtilmiştir.
 
-**MVP kapsamı dışında:** SHAP faktör detayları, manuel tek öğrenci formu, kullanıcı yönetimi, kimlik doğrulama, kurum içi üretim dağıtımı, yeni bağımsız model doğrulaması.
+**İlk sürüme sonradan eklenenler:** log-odds biriminde SHAP faktör açıklamaları, gerçek model tahmini yapan tek öğrenci formu, 16 değişken için şema/seçenek API'si ve nested CV sonuçlarını görselleştiren performans ekranı.
+
+**Hâlâ kapsam dışında:** Kullanıcı yönetimi, kimlik doğrulama, kurum içi üretim dağıtımı, yeni bağımsız model doğrulaması ve hesaplar üzerinden canlı yayın. Yayın prosedürü: [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Yerel kurulum
 
