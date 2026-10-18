@@ -1,0 +1,55 @@
+name: Full-stack browser checks
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/e2e.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install backend and start API
+        run: |
+          python -m pip install -r backend/requirements.txt
+          python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 > /tmp/academic-api.log 2>&1 &
+          echo $! > /tmp/academic-api.pid
+          for n in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/api/health; then break; fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:8000/api/health
+      - name: Install UI and Chromium
+        working-directory: frontend
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Run browser end-to-end checks
+        working-directory: frontend
+        run: npm run test:e2e
+      - name: Upload failure screenshots and traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-debug
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 7
+      - name: Print API log on failure
+        if: failure()
+        run: tail -100 /tmp/academic-api.log || true
