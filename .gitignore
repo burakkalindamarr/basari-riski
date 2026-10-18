@@ -8,3 +8,13 @@ venv/
 .env
 local_artifacts/
 nested_cv_results.json
+
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.production.local
+frontend/playwright-report/
+frontend/test-results/
+frontend/coverage/
+*.tsbuildinfo
+group_audit_results.csv
