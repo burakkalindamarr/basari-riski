@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, BookOpen, CheckCircle2,
-  ChevronLeft, ChevronRight, Download, FileSpreadsheet, GraduationCap,
+  ChevronLeft, ChevronRight, Database, Download, FileSpreadsheet, GraduationCap,
   LayoutDashboard, Loader2, Menu, Moon, RotateCcw, Search, ShieldCheck,
   Sun, Upload, Users, X,
 } from 'lucide-react';
