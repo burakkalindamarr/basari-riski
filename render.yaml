@@ -1,0 +1,14 @@
+# Deploy only after reviewing demo privacy and setting FRONTEND_ORIGINS.
+services:
+  - type: web
+    name: akademik-icgoru-api
+    runtime: python
+    plan: free
+    buildCommand: python -m pip install -r backend/requirements.txt
+    startCommand: python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: FRONTEND_ORIGINS
+        sync: false
