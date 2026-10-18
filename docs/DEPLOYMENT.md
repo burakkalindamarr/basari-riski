@@ -1,6 +1,6 @@
 # Yayına Alma | React + FastAPI
 
-**Durum:** Kaynak kod ve otomatik testler hazırlanmıştır. Canlı React/FastAPI kurulumu, barındırma servislerinde kullanıcı hesabı bağlantısı ve gerçek URL'lerin verilmesini gerektirir. Var olmayan bir adresi canlı uygulama olarak paylaşmayın.
+**Durum:** Canlı araştırma demosu 18.10.2026 tarihinde ücretsiz Render API ve Vercel Hobby frontend ile yayınlandı. **Frontend:** https://akademik-icgoru.vercel.app/ · **API:** https://akademik-icgoru-api.onrender.com/api/health. GitHub Actions canlı smoke testi `/api/health`, `/api/demo`, `/api/schema` ve CORS doğrulamasından başarıyla geçti. **Not:** Vercel GitHub repository entegrasyonu henüz etkin değil; ilk yayın kaynak dosyaları doğrudan Vercel'e gönderilerek yapıldı. GitHub'a yapılan yeni commit'ler otomatik olarak Vercel frontend'ine yansımaz. Aşağıdaki adımlar temiz kurulum veya otomatik güncelleme içindir.
 
 ## 1. API: Render
 
@@ -11,8 +11,7 @@
 5. `/api/health` adresinden modelin başarıyla yüklendiğini doğrulayın.
 6. Render planının CPU/bellek kapasitesi, SHAP ve Scikit-learn bağımlılıkları için yeterli olmalı. Free plan uykuya geçebilir veya kaynak sınırlarına takılabilir; gerektiğinde servis planını yükseltin.
 
-**Örnek** (gerçek adres değildir):
-`https://example-api.onrender.com/api/health`
+**Mevcut canlı API:** `https://akademik-icgoru-api.onrender.com/api/health`
 
 ## 2. Arayüz: Vercel
 
@@ -23,8 +22,7 @@
 5. Dağıtımdan sonra Vercel'in gerçek proje URL'sini Render'daki `FRONTEND_ORIGINS` alanına kaydedin. Render servisini yeniden başlatın.
 6. Hem frontend hem backend'in HTTPS kullandığını doğrulayın.
 
-**Örnek** (gerçek adres değildir):
-`VITE_API_URL=https://example-api.onrender.com/api`
+**Mevcut frontend ayarı:** `VITE_API_URL=https://akademik-icgoru-api.onrender.com/api`
 
 **Not:** Vite env değişkenleri build sırasında paketlenir. URL değişirse Vercel'i yeniden derleyin.
 
