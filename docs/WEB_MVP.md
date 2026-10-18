@@ -60,7 +60,7 @@ Backend'de izin verilen frontend kökenlerini virgülle ayırın:
 
 Frontend HTTPS üzerinden yayınlanıyorsa backend de HTTPS olmalıdır. Değerler gerçek dağıtım alan adlarını temsil etmiyor, örnektir.
 
-**Dağıtım henüz yapılmadı.** Vercel, Render veya başka bir sunucu kurmadan önce güvenlik ve veri işleme süreçlerini doğrulamak gerekir.
+**Canlı araştırma demosu:** https://akademik-icgoru.vercel.app/ · **Render API:** https://akademik-icgoru-api.onrender.com/api/health. GitHub Actions canlı entegrasyon testiyle site, model, SHAP, form şeması ve CORS doğrulandı. Bu, gerçek öğrenci verileriyle kurumsal üretim kullanımına uygun olduğu anlamına gelmez.
 
 ## API sonuç örneği (şema)
 
