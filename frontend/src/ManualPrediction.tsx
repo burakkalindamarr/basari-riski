@@ -78,7 +78,7 @@ export default function ManualPrediction() {
                 {field.kind === 'select' ? <select className="input-field" value={values[name] ?? field.default} required
                   onChange={e => { setValues(v => ({ ...v, [name]: Number(e.target.value) })); setResult(null); }}>
                   {(field.options ?? []).map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                </select> : <input type="number" className="input-field" value={values[name] ?? field.default} step={field.step ?? 1}
+                </select> : <input type="number" className="input-field" value={values[name] ?? field.default} step="any"
                   min={field.min} max={field.max} required
                   onChange={e => { setValues(v => ({ ...v, [name]: Number(e.target.value) })); setResult(null); }} />}
               </label>;
