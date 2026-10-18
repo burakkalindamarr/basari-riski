@@ -34,12 +34,12 @@ Gradient Boosting 2, Random Forest 2 ve Lojistik Regresyon 1 dış katta seçild
 Rapor: [Nested CV sonuçları](../experiments/results/NESTED_CV_REPORT.md).
 
 ## Dağıtım durumu
-- Canlı Streamlit uygulaması **Gradient Boosting** içeren mevcut `model.joblib` dosyasını kullanmaktadır.
-- `python -m experiments.train_candidate` yeni adayları `local_artifacts/` dizinine yazar, canlı dosyanın üzerine yazmaz.
-- Random Forest'ın SHAP çıktısı mevcut Streamlit açıklama koduna doğrudan uyumlu değildir. Arayüz değiştirilmeden canlıya alınmamalıdır.
-- Arayüzdeki %50 / %75 risk sınıfı eşikleri kurumsal olarak doğrulanmış karar eşikleri değildir.
+- [React + FastAPI uygulaması](https://akademik-icgoru.vercel.app/) ile önceki [Streamlit demosu](https://basari-riski-hyy5vq8hxkvtaryukvztbv.streamlit.app/) aynı güvenilir kaynak olarak depodaki `model.joblib` dosyasındaki Gradient Boosting modelini kullanır.
+- FastAPI açıklamaları SHAP TreeExplainer ile **log-odds** biriminde hesaplanır; tahminle toplamsal tutarlılığı test edilir.
+- `python -m experiments.train_candidate` yeni adayları `local_artifacts/` dizinine yazar, canlı modeli değiştirmez. Random Forest sonuçları doğrudan canlı modele geçirilmez.
+- %50 / %75 risk sınıfı eşikleri yalnızca arayüzde gösterim amaçlıdır. Kurumsal karar sınırı olarak doğrulanmamıştır.
 
 ## Etik / sınırlar
-Bu veri Türkiye'deki üniversitelere otomatik olarak genellenemez. Yaş, cinsiyet ve sosyoekonomik değişkenler adillik sorunları doğurabilir; farklı gruplarda hata oranları ayrıca değerlendirilmelidir. SHAP nedensellik kanıtı değildir. Yanlış uyarılar öğrencileri damgalama riski taşır. Gerçek öğrenci verileri herkese açık Streamlit sunucusuna yüklenmemelidir; KVKK ve kurumsal güvenlik süreçleri gereklidir.
+Bu veri Türkiye'deki üniversitelere otomatik olarak genellenemez. Yaş, cinsiyet ve sosyoekonomik değişkenler adillik sorunları doğurabilir; geliştirme verisindeki [grup bazlı denetimde](FAIRNESS_AUDIT.md) hataların gruplar arasında değiştiği görülmüştür. Bu sonuç dış doğrulama veya adil kullanım kanıtı değildir. SHAP nedensellik kanıtı değildir. Yanlış uyarılar öğrencileri damgalama riski taşır. Gerçek öğrenci verileri herkese açık React veya Streamlit uygulamasına yüklenmemelidir; KVKK ve kurumsal güvenlik süreçleri gereklidir.
 
 **Bağımsız dış doğrulama yapılmamıştır.** Bu sistem akademik destek amaçlı bir araştırma prototipidir, otomatik idari/akademik karar mekanizması değildir.
