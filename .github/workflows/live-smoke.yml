@@ -1,0 +1,79 @@
+name: Live site integration smoke test
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/live-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify public frontend and real backend
+        env:
+          FRONTEND: https://akademik-icgoru.vercel.app
+          API: https://akademik-icgoru-api.onrender.com
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+          from urllib.parse import urljoin
+
+          frontend = os.environ["FRONTEND"]
+          api = os.environ["API"]
+
+          def get(url, origin=None):
+              headers = {"User-Agent": "academic-risk-live-smoke/1.0"}
+              if origin:
+                  headers["Origin"] = origin
+              for attempt in range(9):
+                  try:
+                      request = urllib.request.Request(url, headers=headers)
+                      with urllib.request.urlopen(request, timeout=100) as response:
+                          return response.status, dict(response.headers), response.read()
+                  except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as err:
+                      if attempt == 8:
+                          raise
+                      print(f"Attempt {attempt + 1} for {url} failed: {err}", flush=True)
+                      time.sleep(12)
+
+          status, headers, html = get(frontend)
+          assert status == 200, f"Frontend HTTP {status}"
+          assert b"Akademik" in html and b"/assets/" in html, "Frontend HTML incomplete"
+          print("Frontend HTTP 200, bundled assets present")
+
+          status, headers, raw = get(api + "/api/health", origin=frontend)
+          health = json.loads(raw)
+          assert status == 200 and health == {"status": "ok", "model": "loaded"}, health
+          assert headers.get("Access-Control-Allow-Origin") == frontend, headers
+          print("Backend health HTTP 200, model loaded, CORS origin OK")
+
+          status, headers, raw = get(api + "/api/demo", origin=frontend)
+          result = json.loads(raw)
+          assert status == 200, status
+          assert result["summary"]["count"] == 849, result["summary"]
+          assert len(result["students"]) == 849, len(result["students"])
+          first = result["students"][0]
+          assert 0 <= first["risk"] <= 100, first
+          assert first["explanation"]["unit"] == "log_odds", first
+          assert headers.get("Access-Control-Allow-Origin") == frontend, headers
+          print("Demo: 849 scored students, signed SHAP explanations, CORS OK")
+
+          status, _, raw = get(api + "/api/schema", origin=frontend)
+          schema = json.loads(raw)
+          assert status == 200 and len(schema["fields"]) == 16
+          print("Manual form metadata: 16 fields")
+
+          print("LIVE INTEGRATION TEST PASSED")
+          PY
