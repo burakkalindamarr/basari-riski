@@ -12,13 +12,18 @@ import {
 } from 'recharts';
 import { analyzeCsv, downloadCsv, getDemo, REQUIRED_COLUMNS } from './api';
 import type { PredictionResult, RiskLevel, Student } from './api';
+import Explain from './Explain';
+import ManualPrediction from './ManualPrediction';
+import Performance from './Performance';
 
-type Page = 'dashboard' | 'students' | 'method';
+type Page = 'dashboard' | 'students' | 'manual' | 'performance' | 'method';
 type RiskFilter = 'all' | RiskLevel;
 type Theme = 'light' | 'dark';
 const navItems: { id: Page; title: string; icon: typeof LayoutDashboard }[] = [
   { id: 'dashboard', title: 'Genel Bakış', icon: LayoutDashboard },
   { id: 'students', title: 'Öğrenci Analizi', icon: Users },
+  { id: 'manual', title: 'Tek Öğrenci Tahmini', icon: FileSpreadsheet },
+  { id: 'performance', title: 'Model Performansı', icon: BarChart3 },
   { id: 'method', title: 'Model ve Yöntem', icon: BookOpen },
 ];
 const category = {
@@ -228,10 +233,7 @@ function Students({ data }: { data: PredictionResult }) {
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Tahmini başarısızlık olasılığı</p>
           <div className="mt-4"><RiskBadge level={selected.level} /></div>
         </div>
-        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
-          <AlertTriangle size={18} className="mt-0.5 shrink-0" />
-          Faktör bazlı SHAP açıklamaları sonraki aşamada entegre edilecek. Şimdilik yalnızca eğitilmiş modelin gerçek tahmini gösteriliyor.
-        </div>
+        <Explain explanation={selected.explanation} />
       </div>
     </div>}
   </>;
@@ -403,6 +405,8 @@ export default function App() {
         </div> : data ? <>
           {page === 'dashboard' && <Dashboard data={data} theme={theme} showStudents={() => setPage('students')} />}
           {page === 'students' && <Students key={data.source + ':' + data.summary.count} data={data} />}
+          {page === 'manual' && <ManualPrediction />}
+          {page === 'performance' && <Performance theme={theme} />}
           {page === 'method' && <Method algorithm={data.algorithm} features={data.features} />}
         </> : <Card className="py-20 text-center">
           <AlertTriangle className="mx-auto text-amber-500" size={30} />
