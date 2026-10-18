@@ -41,7 +41,7 @@ jobs:
                   try:
                       request = urllib.request.Request(url, headers=headers)
                       with urllib.request.urlopen(request, timeout=100) as response:
-                          return response.status, dict(response.headers), response.read()
+                          return response.status, {key.lower(): value for key, value in response.headers.items()}, response.read()
                   except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as err:
                       if attempt == 8:
                           raise
@@ -56,7 +56,7 @@ jobs:
           status, headers, raw = get(api + "/api/health", origin=frontend)
           health = json.loads(raw)
           assert status == 200 and health == {"status": "ok", "model": "loaded"}, health
-          assert headers.get("Access-Control-Allow-Origin") == frontend, headers
+          assert headers.get("access-control-allow-origin") == frontend, headers
           print("Backend health HTTP 200, model loaded, CORS origin OK")
 
           status, headers, raw = get(api + "/api/demo", origin=frontend)
@@ -67,7 +67,7 @@ jobs:
           first = result["students"][0]
           assert 0 <= first["risk"] <= 100, first
           assert first["explanation"]["unit"] == "log_odds", first
-          assert headers.get("Access-Control-Allow-Origin") == frontend, headers
+          assert headers.get("access-control-allow-origin") == frontend, headers
           print("Demo: 849 scored students, signed SHAP explanations, CORS OK")
 
           status, _, raw = get(api + "/api/schema", origin=frontend)
