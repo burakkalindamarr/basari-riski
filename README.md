@@ -4,6 +4,17 @@ Birinci dönem başında bilinen bilgilerle öğrencilerin **dönem sonunda en a
 
 [Canlı Streamlit demosu](https://basari-riski-hyy5vq8hxkvtaryukvztbv.streamlit.app/) · [Model kartı](docs/MODEL_CARD.md) · [Nested CV sonuç raporu](experiments/results/NESTED_CV_REPORT.md)
 
+## Yeni web arayüzü (React + FastAPI MVP)
+
+Kurumsal görünümlü, açık/koyu tema destekli yeni uygulamanın ilk sürümü `frontend/` ve `backend/` klasörlerinde geliştiriliyor. Mevcut canlı Streamlit sürümü etkilenmez.
+
+- **FastAPI:** Kaydedilmiş Gradient Boosting modeliyle gerçek tahminler, demo verisi, güvenli boyut/şema kontrollü CSV analizi.
+- **React + TypeScript:** Genel bakış, risk sıralaması, bölüm grafikleri, öğrenci detayı, CSV çıktı.
+- **Testler:** Backend için pytest, frontend için TypeScript/Vite derlemesi.
+- **Henüz eklenmeyenler:** SHAP ayrıntı ekranı ve manuel öğrenci formu.
+
+Yeni uygulama **henüz internette yayınlanmadı**. Yerel kurulum için [React + FastAPI geliştirme kılavuzu](docs/WEB_MVP.md) dosyasını inceleyin. Gerçek öğrenci bilgilerini herkese açık bir demoya yüklemeyin.
+
 ## Proje hakkında
 
 Amaç, bir üniversitenin sınırlı öğrenci destek kaynaklarını hangi öğrencilere öncelikli ayırabileceğini araştırmaktır. **Hedef**, kaynak veri setindeki okuldan ayrılma/mezuniyet etiketi değildir. Birinci dönemde kayıtlı derslerin herhangi birinden kalındıysa `1`, tüm dersler geçildiyse `0` olarak belirlenir.
