@@ -1,10 +1,23 @@
 export type RiskLevel = 'low' | 'medium' | 'high';
+export interface FeatureContribution {
+  feature: string;
+  label: string;
+  contribution: number;
+}
+export interface Explanation {
+  unit: 'log_odds';
+  base_value: number;
+  predicted_log_odds: number;
+  increases: FeatureContribution[];
+  decreases: FeatureContribution[];
+}
 export interface Student {
   id: string;
   course: string;
   risk: number;
   level: RiskLevel;
   rank: number;
+  explanation: Explanation;
 }
 export interface CourseStat {
   course: string;
@@ -12,7 +25,7 @@ export interface CourseStat {
   average_risk: number;
 }
 export interface PredictionResult {
-  source: 'demo' | 'upload';
+  source: 'demo' | 'upload' | 'manual';
   summary: {
     count: number;
     low: number;
@@ -50,6 +63,22 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   }
   return response.json() as Promise<T>;
 }
+
+export interface SchemaOption { value: number; label: string }
+export interface SchemaField {
+  name: string;
+  label: string;
+  kind: 'select' | 'number';
+  default: number;
+  min?: number;
+  max?: number;
+  step?: number;
+  options?: SchemaOption[];
+}
+export interface FormSchema { fields: SchemaField[]; notes: string; source: string }
+export const getSchema = () => request<FormSchema>('/schema');
+export const predictOne = (student: Record<string, number>, id: string) =>
+  request<PredictionResult>('/predict', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student, id }) });
 
 export const getDemo = (signal?: AbortSignal) => request<PredictionResult>('/demo', { signal });
 
