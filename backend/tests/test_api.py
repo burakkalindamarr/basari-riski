@@ -132,3 +132,29 @@ def test_manual_rejects_unexpected_features():
     sample["Target"] = 1
     response = client.post("/api/predict", json={"id": "TEST-003", "student": sample})
     assert response.status_code == 422
+
+
+def test_upload_rejects_leaky_or_unnecessary_columns():
+    original = pd.read_csv(ROOT / "ornek_ogrenciler.csv").head(2)
+    original["Target"] = "Graduate"
+    response = client.post("/api/analyze", files={
+        "file": ("students.csv", original.to_csv(index=False), "text/csv")
+    })
+    assert response.status_code == 422
+    assert "Target" in response.json()["detail"]
+
+
+def test_upload_rejects_unknown_category():
+    original = pd.read_csv(ROOT / "ornek_ogrenciler.csv").head(2)
+    original.loc[original.index[0], "Course"] = 123456789
+    response = client.post("/api/analyze", files={
+        "file": ("students.csv", original.to_csv(index=False), "text/csv")
+    })
+    assert response.status_code == 422
+
+
+def test_api_response_disables_browser_caching():
+    response = client.get("/api/demo")
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["x-content-type-options"] == "nosniff"
