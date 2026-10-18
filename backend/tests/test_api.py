@@ -77,3 +77,58 @@ def test_reject_oversized_upload():
         "file": ("students.csv", b"a" * (2 * 1024 * 1024 + 1), "text/csv")
     })
     assert response.status_code == 413
+
+
+def test_shap_matches_binary_probability():
+    import numpy as np
+    from scipy.special import expit
+
+    response = client.get("/api/demo")
+    assert response.status_code == 200, response.text
+    item = response.json()["students"][0]
+    explanation = item["explanation"]
+    assert explanation["unit"] == "log_odds"
+    assert abs(float(expit(explanation["predicted_log_odds"])) - item["risk"] / 100) < .001
+    labels = [feature["feature"] for feature in explanation["increases"] + explanation["decreases"]]
+    assert len(labels) == len(set(labels))
+    assert all(isinstance(f["contribution"], float) for f in explanation["increases"])
+
+
+def test_schema_contains_16_features_and_real_options():
+    response = client.get("/api/schema")
+    assert response.status_code == 200, response.text
+    fields = response.json()["fields"]
+    assert len(fields) == 16
+    assert len(set(f["name"] for f in fields)) == 16
+    course = next(f for f in fields if f["name"] == "Course")
+    assert len(course["options"]) > 5
+    assert any("Hemşirelik" in choice["label"] for choice in course["options"])
+
+
+def test_manual_input_matches_demo_prediction():
+    schema_response = client.get("/api/schema")
+    assert schema_response.status_code == 200, schema_response.text
+    sample = {field["name"]: field["default"] for field in schema_response.json()["fields"]}
+    response = client.post("/api/predict", json={"id": "TEST-001", "student": sample})
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["summary"]["count"] == 1
+    assert result["source"] == "manual"
+    assert result["students"][0]["id"] == "TEST-001"
+    assert result["students"][0]["explanation"]["unit"] == "log_odds"
+
+
+def test_manual_rejects_invalid_code():
+    schema = client.get("/api/schema").json()
+    sample = {field["name"]: field["default"] for field in schema["fields"]}
+    sample["Course"] = 123456789
+    response = client.post("/api/predict", json={"id": "TEST-002", "student": sample})
+    assert response.status_code == 422
+
+
+def test_manual_rejects_unexpected_features():
+    schema = client.get("/api/schema").json()
+    sample = {field["name"]: field["default"] for field in schema["fields"]}
+    sample["Target"] = 1
+    response = client.post("/api/predict", json={"id": "TEST-003", "student": sample})
+    assert response.status_code == 422
