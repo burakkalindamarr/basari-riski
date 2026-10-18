@@ -38,7 +38,7 @@ test('anonymous example CSV upload returns a working data table', async ({ page 
   await page.goto('/');
   await expect(page.getByText('Risk dağılımı')).toBeVisible();
   await page.locator('input[type="file"]').setInputFiles(
-    path.resolve(__dirname, '../../ornek_ogrenciler.csv'),
+    path.resolve(process.cwd(), '../ornek_ogrenciler.csv'),
   );
   await expect(page.getByText('CSV analizi')).toBeVisible();
   await page.getByRole('button', { name: 'Öğrenci Analizi' }).click();
