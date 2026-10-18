@@ -4,7 +4,6 @@ Descriptions never invent meanings for unspecified categorical codes.
 """
 from __future__ import annotations
 
-from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
@@ -27,7 +26,6 @@ NUMERIC_INFO = {
 }
 
 
-@lru_cache(maxsize=1)
 def build_schema(course_labels: dict[int, str]) -> dict:
     df = pd.read_csv(ROOT / "data_3.csv", sep=";", encoding="utf-8-sig")
     df.columns = df.columns.str.strip()
