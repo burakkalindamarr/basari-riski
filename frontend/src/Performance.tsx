@@ -1,5 +1,5 @@
 import { ArrowUpRight, BarChart3, CircleAlert, Target, TrendingUp } from 'lucide-react';
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 const FOLDS = [
   { fold: 'Kat 1', auc: 0.6979, precision20: 0.8309, model: 'Lojistik Regresyon' },
