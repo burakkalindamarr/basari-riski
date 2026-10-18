@@ -2,18 +2,18 @@
 
 Birinci dönem başında bilinen bilgilerle öğrencilerin **dönem sonunda en az bir dersten kalma riskini** tahmin eden ve tahminleri SHAP ile açıklayan makine öğrenmesi araştırma prototipi.
 
-[Canlı Streamlit demosu](https://basari-riski-hyy5vq8hxkvtaryukvztbv.streamlit.app/) · [Model kartı](docs/MODEL_CARD.md) · [Nested CV sonuç raporu](experiments/results/NESTED_CV_REPORT.md)
+[Yeni React web uygulaması](https://akademik-icgoru.vercel.app/) · [Önceki Streamlit demosu](https://basari-riski-hyy5vq8hxkvtaryukvztbv.streamlit.app/) · [Model kartı](docs/MODEL_CARD.md) · [Nested CV sonuç raporu](experiments/results/NESTED_CV_REPORT.md)
 
 ## Yeni web arayüzü (React + FastAPI MVP)
 
-Kurumsal görünümlü, açık/koyu tema destekli yeni uygulamanın ilk sürümü `frontend/` ve `backend/` klasörlerinde geliştiriliyor. Mevcut canlı Streamlit sürümü etkilenmez.
+Kurumsal görünümlü, açık/koyu tema destekli yeni uygulamanın ilk sürümü `frontend/` ve `backend/` klasörlerinde bulunuyor. Mevcut canlı Streamlit sürümü etkilenmez.
 
 - **FastAPI:** Kaydedilmiş Gradient Boosting modeliyle gerçek tahminler, demo verisi, güvenli boyut/şema kontrollü CSV analizi.
 - **React + TypeScript:** Genel bakış, risk sıralaması, bölüm grafikleri, öğrenci detayı, CSV çıktı, manuel tek öğrenci tahmini, SHAP açıklamaları ve model performans ekranı.
-- **Testler:** Backend için pytest, frontend için TypeScript/Vite derlemesi.
-- **Henüz eklenmeyenler:** SHAP ayrıntı ekranı ve manuel öğrenci formu.
+- **Testler:** Backend için pytest, frontend için TypeScript/Vite derlemesi ve Playwright tarayıcı testleri.
+- **Model açıklamaları:** SHAP katkıları log-odds biriminde ve yönleriyle sunulur.
 
-Yeni uygulama **henüz internette yayınlanmadı**. Yerel kurulum için [React + FastAPI geliştirme kılavuzu](docs/WEB_MVP.md) dosyasını inceleyin. Gerçek öğrenci bilgilerini herkese açık bir demoya yüklemeyin.
+**Canlı React uygulaması:** https://akademik-icgoru.vercel.app/ (Vercel) · **API:** https://akademik-icgoru-api.onrender.com (Render). İlk yayın GitHub entegrasyonu tamamlanmadığı için Vercel'e doğrudan kaynak dosyalarından yapıldı; yeni GitHub commit'leri Vercel'i otomatik güncellemeyebilir. Yerel kurulum için [geliştirme kılavuzuna](docs/WEB_MVP.md) bakın. **Gerçek öğrenci bilgilerini herkese açık demoya yüklemeyin.**
 
 ## Proje hakkında
 
@@ -21,7 +21,7 @@ Amaç, bir üniversitenin sınırlı öğrenci destek kaynaklarını hangi öğr
 
 Kullanılan veri: UCI Machine Learning Repository – [Predict Students' Dropout and Academic Success](https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success). Portekiz kaynaklı 4.424 kaydın 180'i ders almamıştır. Kalan 4.244 kayıtta 16 dönem başı özellik kullanılır.
 
-**Teknolojiler:** Python, Pandas, NumPy, Scikit-learn, SHAP, Streamlit, Joblib, Pytest.
+**Teknolojiler:** Python, Pandas, NumPy, Scikit-learn, SHAP, FastAPI, React, TypeScript, Tailwind CSS, Recharts, Streamlit, Joblib, Pytest, Playwright.
 
 ### Modelleme yöntemi
 
