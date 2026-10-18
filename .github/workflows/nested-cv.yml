@@ -1,13 +1,6 @@
 name: Nested CV validation
 
 on:
-  push:
-    branches:
-      - improvement/01-model-validation
-    paths:
-      - experiments/run_nested_cv.py
-      - .github/workflows/nested-cv.yml
-      - data_3.csv
   workflow_dispatch:
 
 permissions:
