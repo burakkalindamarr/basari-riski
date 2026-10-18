@@ -139,6 +139,14 @@ def checked_features(data: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
             status_code=422,
             detail="Eksik özellik sütunları: " + ", ".join(missing),
         )
+    # Prevent users from unintentionally uploading names, contact information,
+    # original target labels or other unnecessary sensitive columns.
+    unexpected = sorted(set(data.columns) - set(columns) - {"ogrenci_no"})
+    if unexpected:
+        raise HTTPException(
+            status_code=422,
+            detail="Gereksiz veya desteklenmeyen sütunlar: " + ", ".join(unexpected),
+        )
     if not (1 <= len(data) <= MAX_ROWS):
         raise HTTPException(
             status_code=422,
@@ -158,6 +166,15 @@ def checked_features(data: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
             status_code=422,
             detail="Girdi sütunlarında boş veya geçersiz sayı var.",
         )
+    schema = build_schema(COURSES)
+    for field in schema["fields"]:
+        col = field["name"]
+        if field["kind"] == "select":
+            valid_codes = {opt["value"] for opt in field["options"]}
+            if not X[col].isin(valid_codes).all():
+                raise HTTPException(status_code=422, detail=f"Geçersiz kategori kodu: {field['label']}")
+        elif not X[col].between(field["min"], field["max"]).all():
+            raise HTTPException(status_code=422, detail=f"Değer aralık dışında: {field['label']}")
     if "Age at enrollment" in X and not X["Age at enrollment"].between(15, 100).all():
         raise HTTPException(status_code=422, detail="Kayıt yaşı 15–100 aralığında olmalı.")
     for binary in ("Gender", "Displaced", "Scholarship holder", "Daytime/evening attendance"):
