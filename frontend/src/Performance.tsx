@@ -101,6 +101,36 @@ export default function Performance({ theme }: { theme: 'light' | 'dark' }) {
       </p>
     </section>
 
+    <section className="card-surface mt-5 overflow-hidden">
+      <div className="p-5 sm:p-6">
+        <h2 className="font-semibold text-slate-900 dark:text-white">Gruplar arası hata farkları</h2>
+        <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+          Gradient Boosting'in geliştirme kümesindeki çapraz doğrulama tahminleriyle %50 karar eşiğinde hesaplandı.
+          İlgili grupların gerçek başarısızlık oranları farklıdır; gözlenen farklar tek başına nedensellik veya ayrımcılık kanıtlamaz.
+        </p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="table-base">
+          <thead><tr><th>Grup</th><th>Kod</th><th>Öğrenci</th><th>Recall</th><th>Yanlış alarm (FPR)</th></tr></thead>
+          <tbody>
+            {[
+              ['Cinsiyet', '0', '2.255', '%75,4', '%47,4'],
+              ['Cinsiyet', '1', '1.140', '%89,4', '%70,1'],
+              ['Burs durumu', '0', '2.552', '%87,8', '%73,1'],
+              ['Burs durumu', '1', '843', '%45,8', '%19,6'],
+              ['Yerinden edilme', '0', '1.590', '%86,3', '%59,4'],
+              ['Yerinden edilme', '1', '1.805', '%75,2', '%49,1'],
+            ].map(row => <tr key={row[0] + row[1]}>{row.map((cell, i) => <td key={i}>{cell}</td>)}</tr>)}
+          </tbody>
+        </table>
+      </div>
+      <div className="border-t border-slate-100 p-4 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+        <a className="font-semibold text-blue-700 hover:underline dark:text-sky-400"
+          href="https://github.com/burakkalindamarr/basari-riski/blob/main/docs/FAIRNESS_AUDIT.md"
+          target="_blank" rel="noreferrer">Denetim raporu ve sınırlılıklarını incele ↗</a>
+      </div>
+    </section>
+
     <section className="mt-5 flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-500/20 dark:bg-amber-500/10">
       <CircleAlert size={21} className="mt-0.5 shrink-0 text-amber-700 dark:text-amber-300" />
       <div className="text-sm leading-6 text-amber-900 dark:text-amber-200">
