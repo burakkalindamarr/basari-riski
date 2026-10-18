@@ -1,98 +1,43 @@
 # Akademik İçgörü
 
-**Üniversite öğrencilerinde birinci dönem başarısızlık riskinin erken tahmini ve açıklanması**
+**Üniversite öğrencilerinde akademik başarısızlık riskinin erken tahmini**
 
-Öğrencilerin kayıt sırasında bilinen özelliklerinden yararlanarak ilk dönem sonunda en az bir dersten kalma olasılığını tahmin eden bir makine öğrenmesi çalışması. Sonuçlar, öğrenci desteğine ihtiyaç duyabilecek kişileri sıralamak amacıyla hazırlanan bir web arayüzünde gösteriliyor.
+Öğrencinin dönem başında bilinen bilgilerini kullanarak ilk dönem sonunda en az bir dersten kalma olasılığını tahmin eden bir makine öğrenmesi projesi. Tahminin hangi özelliklerden etkilendiği SHAP ile açıklanır.
 
-**[Canlı uygulama](https://akademik-icgoru.vercel.app/)** · [Model ve sınırlılıklar](docs/MODEL_CARD.md) · [Deney sonuçları](experiments/results/NESTED_CV_REPORT.md)
+**[Canlı uygulamayı aç](https://akademik-icgoru.vercel.app/)**
 
-## Proje ne yapıyor?
+## Özellikler
 
-- Dönem başında bilinebilen **16 değişken** kullanarak başarısızlık olasılığı hesaplıyor.
-- **SHAP** ile tahmini artıran ve azaltan özellik katkılarını gösteriyor. Katkılar log-odds ölçeğindedir, yüzde puanı veya nedensellik değildir.
-- Tek öğrenci için form üzerinden, çok sayıda öğrenci için CSV yükleyerek tahmin üretiyor.
-- Bölüm bazında özetler, risk sıralaması, filtreler ve indirilebilir rapor sunuyor.
-- Model deneylerini ve grup bazındaki hata farklılıklarını ayrı bir performans ekranında raporluyor.
+- Tek öğrenci için risk tahmini ve SHAP açıklaması
+- CSV ile toplu analiz, filtreleme ve sonuç indirme
+- Risk dağılımı, bölüm karşılaştırması ve model performansı
+- Açık/koyu tema destekli web arayüzü
 
-**Kapsam:** Başarısızlık, öğrencinin birinci dönemde aldığı derslerden **en az birinden kalması** olarak tanımlanıyor. Veri setinin orijinal `Target` sütunundaki okuldan ayrılma / mezun olma durumu tahmin edilmiyor.
+## Veri ve model
 
-## Yaklaşım ve sonuçlar
+[UCI öğrenci başarı verisi](https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success) kullanıldı. İlk dönemde ders almayanlar çıkarıldıktan sonra **4.244 öğrenci** ve dönem başında bilinebilen **16 özellik** değerlendirildi. Hedef, ilk dönem sonunda **en az bir dersten kalma** durumudur.
 
-Kaynak: [UCI – Predict Students' Dropout and Academic Success](https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success). Toplam 4.424 kayıttan ilk dönem ders almayan 180 kayıt çıkarıldı; **4.244 öğrenci** analizde kaldı.
+Geliştirme verisinde iç içe çapraz doğrulama ile elde edilen sonuçlar:
 
-Girdi sütunları yalnızca dönem başında bilinebilen başvuru, önceki eğitim, burs ve demografik bilgilerden seçildi. Notlar, ders başarıları ve dönem sonundan öğrenilebilecek diğer alanlar modele verilmedi.
-
-Modeller, bir **scikit-learn Pipeline** içinde kodlama ve ölçekleme yapılarak karşılaştırıldı. Geliştirme kümesinde 5 dış / 3 iç katlı çapraz doğrulama kullanıldı.
-
-| Metrik | İç doğrulama sonucu |
+| Metrik | Sonuç |
 |---|---:|
-| ROC-AUC | **0,7116** |
-| Recall (%50 eşik) | %82,27 |
-| Precision (%50 eşik) | %68,35 |
-| Brier skoru | 0,2092 |
-| En riskli %20'de precision | **%81,76** |
+| ROC-AUC | 0,712 |
+| Recall (%50 eşik) | %82,3 |
+| En riskli %20'de isabet | %81,8 |
 
-Bu metrikler **keşifsel iç doğrulama** sonuçlarıdır. Daha önce incelenen %20'lik ayrım artık bağımsız test kümesi sayılamaz. Farklı üniversite veya dönemde bağımsız doğrulama yapılmadı. Canlı API, kayıtlı **Gradient Boosting** modelini çalıştırır; tablodaki sonuçlar algoritma seçimini de içeren değerlendirme prosedürüne aittir, tek bir canlı model için bağımsız test iddiası değildir.
+Bunlar **iç doğrulama** sonuçlarıdır; farklı bir üniversitede bağımsız test yapılmadı. Canlı tahminlerde Gradient Boosting modeli kullanılıyor. Ayrıntılar: [model kartı](docs/MODEL_CARD.md) ve [deney raporu](experiments/results/NESTED_CV_REPORT.md).
 
-Ayrıntılar: [Nested CV raporu](experiments/results/NESTED_CV_REPORT.md) · [Grup bazında hata analizi](docs/FAIRNESS_AUDIT.md).
+## Teknolojiler
 
-## Uygulama mimarisi
+**Python, Scikit-learn, SHAP, FastAPI, React, TypeScript**
 
-| Katman | Kullanılan araçlar |
-|---|---|
-| Web arayüzü | React, TypeScript, Tailwind CSS, Recharts |
-| API | FastAPI, Pydantic |
-| Model | Python, pandas, NumPy, scikit-learn, SHAP |
-| Test | pytest, Playwright, GitHub Actions |
-| Yayın | Vercel (arayüz), Render (API) |
+- `backend/`: Tahmin ve açıklama API'si
+- `frontend/`: Web arayüzü
+- `src/`, `experiments/`: Veri hazırlama ve model deneyleri
+- `docs/`: Teknik raporlar ve kurulum
 
-API, `model.joblib` dosyasındaki eğitilmiş modeli kullanır. Kodun yerel sürümü ile yayınlanan sürüm arasındaki veri akışı aynıdır:
+Yerel kurulum: [Geliştirme notları](docs/LOCAL_DEVELOPMENT.md).
 
-`CSV / manuel giriş → özellik kontrolü → model tahmini → SHAP açıklaması → API → web arayüzü`
+> Bu proje bir araştırma prototipidir. Gerçek öğrenci verileri herkese açık demoya yüklenmemeli; tahminler otomatik akademik karar amacıyla kullanılmamalıdır.
 
-Önceki denemelerde kullanılan [Streamlit arayüzü](https://basari-riski-hyy5vq8hxkvtaryukvztbv.streamlit.app/) de erişilebilir durumdadır.
-
-## Yerel çalıştırma
-
-**Gereksinimler:** Python 3.11 ve Node.js 20+.
-
-Depoyu klonladıktan sonra proje kökünde:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -r backend/requirements.txt
-python -m uvicorn backend.main:app --reload
-```
-
-İkinci terminalde:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Web arayüzü: **http://localhost:5173** · API dokümantasyonu: **http://127.0.0.1:8000/docs**
-
-Geliştirme komutları, testler ve ortam değişkenleri için [yerel geliştirme notlarına](docs/LOCAL_DEVELOPMENT.md) bakılabilir.
-
-## Depo yapısı
-
-```text
-backend/           FastAPI, model açıklamaları ve API testleri
-frontend/          React uygulaması ve tarayıcı testleri
-src/               Veri hazırlama ve model pipeline'ı
-experiments/       Model karşılaştırmaları ve yeniden üretim betikleri
-tests/             Model/veri testleri
-docs/              Model kartı, adillik analizi ve dağıtım bilgileri
-app.py             İlk Streamlit arayüzü
-model.joblib       Canlı tahminlerde kullanılan eğitilmiş model
-data_3.csv         Araştırmada kullanılan kaynak veri
-```
-
-## Sınırlar ve veri kullanımı
-
-Bu proje **araştırma prototipidir**; öğrenciler hakkında otomatik akademik karar vermek için uygun değildir. Çalışma Portekiz kaynaklı bir veri setine dayanır. Grup bazında hata oranlarında farklar gözlendiğinden gerçek kullanım öncesinde adillik, kalibrasyon ve dış doğrulama çalışmaları gerekir. Web demosunda kullanıcı yetkilendirmesi veya kurumsal veri işleme altyapısı bulunmuyor: **gerçek öğrencilere ait kişisel verileri yüklemeyin.**
-
-Kaynak veri: Realinho, V., Vieira Martins, M., Machado, J. & Baptista, L. (2021), *Predict Students' Dropout and Academic Success*, UCI Machine Learning Repository, [DOI: 10.24432/C5MC89](https://doi.org/10.24432/C5MC89), **CC BY 4.0**. Bu lisans bilgisi kaynak veri setine aittir.
+Veri: Realinho vd., UCI Machine Learning Repository, [DOI: 10.24432/C5MC89](https://doi.org/10.24432/C5MC89), CC BY 4.0.
