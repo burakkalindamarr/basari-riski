@@ -9,7 +9,7 @@ Birinci dönem başında bilinen bilgilerle öğrencilerin **dönem sonunda en a
 Kurumsal görünümlü, açık/koyu tema destekli yeni uygulamanın ilk sürümü `frontend/` ve `backend/` klasörlerinde geliştiriliyor. Mevcut canlı Streamlit sürümü etkilenmez.
 
 - **FastAPI:** Kaydedilmiş Gradient Boosting modeliyle gerçek tahminler, demo verisi, güvenli boyut/şema kontrollü CSV analizi.
-- **React + TypeScript:** Genel bakış, risk sıralaması, bölüm grafikleri, öğrenci detayı, CSV çıktı.
+- **React + TypeScript:** Genel bakış, risk sıralaması, bölüm grafikleri, öğrenci detayı, CSV çıktı, manuel tek öğrenci tahmini, SHAP açıklamaları ve model performans ekranı.
 - **Testler:** Backend için pytest, frontend için TypeScript/Vite derlemesi.
 - **Henüz eklenmeyenler:** SHAP ayrıntı ekranı ve manuel öğrenci formu.
 
