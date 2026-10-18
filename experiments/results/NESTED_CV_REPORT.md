@@ -56,7 +56,7 @@ Model seçimi katlar arasında değişiyor; tek algoritmayı baskın üstün ila
 4. Tek kuruma/ülkeye ait veri için kurumlar arası genellenebilirlik gösterilmedi.
 5. Risk tahmini ile destek müdahalesinin etkisi farklı kavramlardır; bu deney destek verilince başarının artacağını kanıtlamaz.
 
-**Sonraki aşama:** Önceden belirlenen başarı ölçütlerini, eğitim akışını ve risk eşiklerini raporlamak; bağımsız/yeni veri üzerinde değerlendirme, kalibrasyon ve grup bazlı hata/adillik analizine geçmek.
+**Takip çalışmaları:** Geliştirme verisinde [grup bazlı hata analizi](../../docs/FAIRNESS_AUDIT.md) yapıldı. Bağımsız yeni dönem/üniversite verisi, olasılık kalibrasyonu, adillik metriklerinin güven aralıkları ve destek kapasitesine göre eşik seçimi hâlâ açık konulardır.
 
 ## Tekrar üretim
 

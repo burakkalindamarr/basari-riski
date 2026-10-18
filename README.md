@@ -1,108 +1,98 @@
-# Akademik Başarısızlık Riskinin Açıklanabilir Yapay Zekâ ile Erken Tahmini
+# Akademik İçgörü
 
-Birinci dönem başında bilinen bilgilerle öğrencilerin **dönem sonunda en az bir dersten kalma riskini** tahmin eden ve tahminleri SHAP ile açıklayan makine öğrenmesi araştırma prototipi.
+**Üniversite öğrencilerinde birinci dönem başarısızlık riskinin erken tahmini ve açıklanması**
 
-[Yeni React web uygulaması](https://akademik-icgoru.vercel.app/) · [Önceki Streamlit demosu](https://basari-riski-hyy5vq8hxkvtaryukvztbv.streamlit.app/) · [Model kartı](docs/MODEL_CARD.md) · [Nested CV sonuç raporu](experiments/results/NESTED_CV_REPORT.md)
+Öğrencilerin kayıt sırasında bilinen özelliklerinden yararlanarak ilk dönem sonunda en az bir dersten kalma olasılığını tahmin eden bir makine öğrenmesi çalışması. Sonuçlar, öğrenci desteğine ihtiyaç duyabilecek kişileri sıralamak amacıyla hazırlanan bir web arayüzünde gösteriliyor.
 
-## Yeni web arayüzü (React + FastAPI MVP)
+**[Canlı uygulama](https://akademik-icgoru.vercel.app/)** · [Model ve sınırlılıklar](docs/MODEL_CARD.md) · [Deney sonuçları](experiments/results/NESTED_CV_REPORT.md)
 
-Kurumsal görünümlü, açık/koyu tema destekli yeni uygulamanın ilk sürümü `frontend/` ve `backend/` klasörlerinde bulunuyor. Mevcut canlı Streamlit sürümü etkilenmez.
+## Proje ne yapıyor?
 
-- **FastAPI:** Kaydedilmiş Gradient Boosting modeliyle gerçek tahminler, demo verisi, güvenli boyut/şema kontrollü CSV analizi.
-- **React + TypeScript:** Genel bakış, risk sıralaması, bölüm grafikleri, öğrenci detayı, CSV çıktı, manuel tek öğrenci tahmini, SHAP açıklamaları ve model performans ekranı.
-- **Testler:** Backend için pytest, frontend için TypeScript/Vite derlemesi ve Playwright tarayıcı testleri.
-- **Model açıklamaları:** SHAP katkıları log-odds biriminde ve yönleriyle sunulur.
+- Dönem başında bilinebilen **16 değişken** kullanarak başarısızlık olasılığı hesaplıyor.
+- **SHAP** ile tahmini artıran ve azaltan özellik katkılarını gösteriyor. Katkılar log-odds ölçeğindedir, yüzde puanı veya nedensellik değildir.
+- Tek öğrenci için form üzerinden, çok sayıda öğrenci için CSV yükleyerek tahmin üretiyor.
+- Bölüm bazında özetler, risk sıralaması, filtreler ve indirilebilir rapor sunuyor.
+- Model deneylerini ve grup bazındaki hata farklılıklarını ayrı bir performans ekranında raporluyor.
 
-**Canlı React uygulaması:** https://akademik-icgoru.vercel.app/ (Vercel) · **API:** https://akademik-icgoru-api.onrender.com (Render). İlk yayın GitHub entegrasyonu tamamlanmadığı için Vercel'e doğrudan kaynak dosyalarından yapıldı; yeni GitHub commit'leri Vercel'i otomatik güncellemeyebilir. Yerel kurulum için [geliştirme kılavuzuna](docs/WEB_MVP.md) bakın. **Gerçek öğrenci bilgilerini herkese açık demoya yüklemeyin.**
+**Kapsam:** Başarısızlık, öğrencinin birinci dönemde aldığı derslerden **en az birinden kalması** olarak tanımlanıyor. Veri setinin orijinal `Target` sütunundaki okuldan ayrılma / mezun olma durumu tahmin edilmiyor.
 
-## Proje hakkında
+## Yaklaşım ve sonuçlar
 
-Amaç, bir üniversitenin sınırlı öğrenci destek kaynaklarını hangi öğrencilere öncelikli ayırabileceğini araştırmaktır. **Hedef**, kaynak veri setindeki okuldan ayrılma/mezuniyet etiketi değildir. Birinci dönemde kayıtlı derslerin herhangi birinden kalındıysa `1`, tüm dersler geçildiyse `0` olarak belirlenir.
+Kaynak: [UCI – Predict Students' Dropout and Academic Success](https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success). Toplam 4.424 kayıttan ilk dönem ders almayan 180 kayıt çıkarıldı; **4.244 öğrenci** analizde kaldı.
 
-Kullanılan veri: UCI Machine Learning Repository – [Predict Students' Dropout and Academic Success](https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success). Portekiz kaynaklı 4.424 kaydın 180'i ders almamıştır. Kalan 4.244 kayıtta 16 dönem başı özellik kullanılır.
+Girdi sütunları yalnızca dönem başında bilinebilen başvuru, önceki eğitim, burs ve demografik bilgilerden seçildi. Notlar, ders başarıları ve dönem sonundan öğrenilebilecek diğer alanlar modele verilmedi.
 
-**Teknolojiler:** Python, Pandas, NumPy, Scikit-learn, SHAP, FastAPI, React, TypeScript, Tailwind CSS, Recharts, Streamlit, Joblib, Pytest, Playwright.
+Modeller, bir **scikit-learn Pipeline** içinde kodlama ve ölçekleme yapılarak karşılaştırıldı. Geliştirme kümesinde 5 dış / 3 iç katlı çapraz doğrulama kullanıldı.
 
-### Modelleme yöntemi
-
-- Kategorik alanlarda OneHotEncoder, sayısal alanlarda StandardScaler, birlikte sklearn Pipeline.
-- Birinci/ikinci dönem notları, `Target` ve dönem sonrasında öğrenilebilecek bilgiler tahmin girdilerinde yer almaz.
-- Lojistik Regresyon, Karar Ağacı, Random Forest ve Gradient Boosting ile karşılaştırmalar; ilk deneylerde KNN ve SVM.
-- ROC-AUC, Precision, Recall, F1, Brier, Precision@k, Recall@k ve Lift@k değerlendirmeleri.
-
-### Geliştirme kümesinde iç doğrulama
-
-Model geliştirme sırasında eski %20 test kümesine bakıldığı için artık bağımsız son test olarak kullanılamaz. Eski %80 geliştirme verisi üzerinde 5 dış ve 3 iç katlı nested çapraz doğrulama yapılmıştır.
-
-| Metrik | Sonuç |
+| Metrik | İç doğrulama sonucu |
 |---|---:|
 | ROC-AUC | **0,7116** |
-| Brier | **0,2092** |
-| Recall (%50 eşik) | **%82,27** |
-| Precision (%50 eşik) | **%68,35** |
-| F1 | **0,7458** |
-| En riskli %20'lik grupta başarısızlık oranı | **%81,76** |
-| Toplam başarısızların bu grupta yakalanma oranı | **%27,62** |
-| Lift@%20 | **1,379** |
+| Recall (%50 eşik) | %82,27 |
+| Precision (%50 eşik) | %68,35 |
+| Brier skoru | 0,2092 |
+| En riskli %20'de precision | **%81,76** |
 
-Bu değerler keşifsel iç doğrulama sonuçlarıdır, dış doğrulama değildir. En riskli %20'lik grupta başarısızlık oranı genel ortalama olan yaklaşık %59,3'ün üzerindedir ancak başarısız öğrencilerin çoğu bu grubun dışında kalır. Bu nedenle model kesin karar değil **önceliklendirme** amacıyla düşünülmelidir.
+Bu metrikler **keşifsel iç doğrulama** sonuçlarıdır. Daha önce incelenen %20'lik ayrım artık bağımsız test kümesi sayılamaz. Farklı üniversite veya dönemde bağımsız doğrulama yapılmadı. Canlı API, kayıtlı **Gradient Boosting** modelini çalıştırır; tablodaki sonuçlar algoritma seçimini de içeren değerlendirme prosedürüne aittir, tek bir canlı model için bağımsız test iddiası değildir.
 
-[Ölçüm yöntemi ve kat bazındaki sonuçlar](experiments/results/NESTED_CV_REPORT.md).
+Ayrıntılar: [Nested CV raporu](experiments/results/NESTED_CV_REPORT.md) · [Grup bazında hata analizi](docs/FAIRNESS_AUDIT.md).
 
-## Kullanıcı arayüzü
+## Uygulama mimarisi
 
-Streamlit uygulaması öğrenci CSV'si veya örnek kayıtları üzerinden riskleri sıralar, risk seviyelerini özetler, öğrenci bazlı SHAP faktörleri sunar ve CSV raporu oluşturur. Mevcut uygulama Gradient Boosting kullanmaktadır. Aday Random Forest modeli otomatik olarak dağıtılmaz; SHAP uyumluluk güncellemesi gereklidir.
-
-## Çalıştırma
-
-Proje kökünde Python 3.11 önerilir.
-
-~~~bash
-python -m pip install -r requirements.txt
-streamlit run app.py
-~~~
-
-Mevcut canlı modelin üzerine yazmadan yeni aday modeli üretmek için:
-
-~~~bash
-python -m experiments.train_candidate --algorithm gradient_boosting
-python -m experiments.train_candidate --algorithm random_forest
-~~~
-
-Modeller ve sürüm/veri meta bilgisi `local_artifacts/` klasörüne kaydedilir; bu klasör Git tarafından takip edilmez.
-
-Otomatik testler:
-
-~~~bash
-python -m pip install pytest
-python -m pytest tests/ -q
-~~~
-
-Nested model seçimi/değerlendirmesi:
-
-~~~bash
-python experiments/run_nested_cv.py
-~~~
-
-## Dosyalar
-
-| Dosya | Açıklama |
+| Katman | Kullanılan araçlar |
 |---|---|
-| `app.py` | Streamlit uygulaması |
-| `basari_analizi.ipynb` | İlk keşifsel Notebook |
-| `src/risk_model.py` | Sabit 16 özellik, hedef hazırlama, preprocessing ve modeller |
-| `experiments/train_candidate.py` | Canlı uygulamadan ayrı yeniden üretilebilir model eğitimi |
-| `experiments/run_nested_cv.py` | İç içe çapraz doğrulama |
-| `experiments/results/NESTED_CV_REPORT.md` | İç değerlendirme sonuç raporu |
-| `tests/test_risk_model.py` | Veri kalitesi ve model testleri |
-| `docs/MODEL_CARD.md` | Kullanım amacı, yöntem, sınırlılıklar ve etik |
-| `data_3.csv` | Kaynak veri |
-| `model.joblib` | Şu anki uygulamada kullanılan model |
+| Web arayüzü | React, TypeScript, Tailwind CSS, Recharts |
+| API | FastAPI, Pydantic |
+| Model | Python, pandas, NumPy, scikit-learn, SHAP |
+| Test | pytest, Playwright, GitHub Actions |
+| Yayın | Vercel (arayüz), Render (API) |
 
-## Veri kaynağı, lisans ve sınırlılıklar
+API, `model.joblib` dosyasındaki eğitilmiş modeli kullanır. Kodun yerel sürümü ile yayınlanan sürüm arasındaki veri akışı aynıdır:
 
-Realinho, V., Vieira Martins, M., Machado, J. ve Baptista, L. (2021). *Predict Students' Dropout and Academic Success*. UCI Machine Learning Repository. https://doi.org/10.24432/C5MC89. Veri **CC BY 4.0** lisanslıdır.
+`CSV / manuel giriş → özellik kontrolü → model tahmini → SHAP açıklaması → API → web arayüzü`
 
-Tek ülkeden veri kullanılmıştır; Türkiye için genellenebilirlik doğrulanmamıştır. Demografik özelliklerde yanlılık, yanlış alarm, yanlış negatif ve özel öğrenci verisi riski vardır. SHAP nedensellik kanıtı değildir. Kurumsal değerlendirme olmadan kişisel öğrenci verileri herkese açık uygulamaya yüklenmemelidir.
+Önceki denemelerde kullanılan [Streamlit arayüzü](https://basari-riski-hyy5vq8hxkvtaryukvztbv.streamlit.app/) de erişilebilir durumdadır.
 
-**Durum:** Araştırma ve öğrenci desteği amaçlı prototip; öğrenciler hakkında otomatik karar vermek için uygun değildir.
+## Yerel çalıştırma
+
+**Gereksinimler:** Python 3.11 ve Node.js 20+.
+
+Depoyu klonladıktan sonra proje kökünde:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r backend/requirements.txt
+python -m uvicorn backend.main:app --reload
+```
+
+İkinci terminalde:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Web arayüzü: **http://localhost:5173** · API dokümantasyonu: **http://127.0.0.1:8000/docs**
+
+Geliştirme komutları, testler ve ortam değişkenleri için [yerel geliştirme notlarına](docs/LOCAL_DEVELOPMENT.md) bakılabilir.
+
+## Depo yapısı
+
+```text
+backend/           FastAPI, model açıklamaları ve API testleri
+frontend/          React uygulaması ve tarayıcı testleri
+src/               Veri hazırlama ve model pipeline'ı
+experiments/       Model karşılaştırmaları ve yeniden üretim betikleri
+tests/             Model/veri testleri
+docs/              Model kartı, adillik analizi ve dağıtım bilgileri
+app.py             İlk Streamlit arayüzü
+model.joblib       Canlı tahminlerde kullanılan eğitilmiş model
+data_3.csv         Araştırmada kullanılan kaynak veri
+```
+
+## Sınırlar ve veri kullanımı
+
+Bu proje **araştırma prototipidir**; öğrenciler hakkında otomatik akademik karar vermek için uygun değildir. Çalışma Portekiz kaynaklı bir veri setine dayanır. Grup bazında hata oranlarında farklar gözlendiğinden gerçek kullanım öncesinde adillik, kalibrasyon ve dış doğrulama çalışmaları gerekir. Web demosunda kullanıcı yetkilendirmesi veya kurumsal veri işleme altyapısı bulunmuyor: **gerçek öğrencilere ait kişisel verileri yüklemeyin.**
+
+Kaynak veri: Realinho, V., Vieira Martins, M., Machado, J. & Baptista, L. (2021), *Predict Students' Dropout and Academic Success*, UCI Machine Learning Repository, [DOI: 10.24432/C5MC89](https://doi.org/10.24432/C5MC89), **CC BY 4.0**. Bu lisans bilgisi kaynak veri setine aittir.
